@@ -163,7 +163,9 @@ Type `./gradlew installDist` in the main directory to locally install Hermes.
 
 > `java -Duser.dir="$bft_home/build/install/library/" -Djava.security.properties="$bft_home/build/install/library/config/java.security" -Dlogback.configurationFile="$bft_home/build/install/library/config/logback.xml" -cp ".:$bft_home/build/install/library/:$bft_home/build/install/library/lib/*" zermia.coordinator.ZermiaCoordinatorMain schedule.yaml`
 
-- __Running a modified version of BFTCounterClient test (original -> single threaded; new -> multithreaded)__
+### Example for running a concurrent version of BFTCounterClient (original -> single threaded; new -> multithreaded)
+
+#### Starting replicas
 
 - __Server 0__
 > `java -Duser.dir="$bft_home/build/local/rep0/" -Djava.security.properties="$bft_home/build/local/rep0/config/java.security" -Dlogback.configurationFile="$bft_home/build/local/rep0/config/logback.xml" -cp ".:$bft_home/build/local/rep0/:$bft_home/build/local/rep0/lib/*" bftsmart.demo.counter.BFTCounterServer 0`
@@ -177,9 +179,10 @@ Type `./gradlew installDist` in the main directory to locally install Hermes.
 - __Server 1__
 > `java -Duser.dir="$bft_home/build/local/rep3/" -Djava.security.properties="$bft_home/build/local/rep3/config/java.security" -Dlogback.configurationFile="$bft_home/build/local/rep3/config/logback.xml" -cp ".:$bft_home/build/local/rep3/:$bft_home/build/local/rep3/lib/*" bftsmart.demo.counter.BFTCounterServer 3`
 
+#### Starting client(s)
+
 - __Client__
 > `CounterClient <client id> <increment value> [<number of operations>] [<number of clients>]`
-
 
 > `java -Duser.dir="$bft_home/build/local/cli0/" -Djava.security.properties="$bft_home/build/local/cli0/config/java.security" -Dlogback.configurationFile="$bft_home/build/local/cli0/config/logback.xml" -cp ".:$bft_home/build/local/cli0/:$bft_home/build/local/cli0/lib/*" bftsmart.demo.counter.CounterClient 1001 1 100 3`
 
@@ -188,5 +191,9 @@ Type `./gradlew installDist` in the main directory to locally install Hermes.
 
 
 ## Additional information and publications
+
+- [Injecting Faults in Byzantine Fault Tolerance Protocols](https://repositorio-aberto.up.pt/bitstream/10216/139430/2/528129.pdf) 
+- ZERMIA - A Fault Injector Framework for Testing Byzantine Fault Tolerant Protocols. 15th Network and System Security 2022. Find it [here](https://dl.acm.org/doi/abs/10.1007/978-3-030-92708-0_3) or [here](https://link.springer.com/chapter/10.1007/978-3-030-92708-0_3)
+- Experiences with Fault-Injection in a Byzantine Fault-Tolerant Protocol. 14th International Middleware Conference (Middleware). Find it [here](https://hal.science/hal-01480791/)
 
 ***Feel free to contact us if you have any questions!***
