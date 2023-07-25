@@ -174,7 +174,8 @@ public class ZermiaCoordinatorMain extends ZermiaCoordinatorServicesGrpc.ZermiaC
             System.exit(-1);
         }
 
-        File scheduleFile = new File(args[0]);
+        File scheduleFile = new File(System.getProperty("user.dir"), args[0]);
+        System.out.printf("[ZermiaCoordinatorMain] schedule file: %s\n", scheduleFile);
 
         if(!scheduleFile.exists()) {
             System.out.println("Unable to open schedule file: " + args[0]);
@@ -185,7 +186,7 @@ public class ZermiaCoordinatorMain extends ZermiaCoordinatorServicesGrpc.ZermiaC
         }
 
         GlobalFaultSchedule schedule = parseSchedule(scheduleFile);
-        System.out.println(schedule);
+        System.out.printf("[ZermiaCoordinatorMain] global schedule: %s\n", schedule);
         ZermiaCoordinatorMain coordinator = new ZermiaCoordinatorMain(schedule);
 
         try {

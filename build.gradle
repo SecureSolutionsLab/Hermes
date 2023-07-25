@@ -34,7 +34,6 @@ compileJava {
     //options.compilerArgs << "-Xlint"
 }
 
-
 repositories {
     mavenCentral()
 }
@@ -96,6 +95,14 @@ sourceSets {
 }
 // End
 
+//startScripts.enabled = false
+
+task coordinator(type: CreateStartScripts) {
+    mainClass = 'zermia.coordinator.ZermiaCoordinatorMain'
+    applicationName = 'ZermiaCoordinatorMain'
+    outputDir = new File(project.buildDir, 'scripts/' + name)
+    //classpath = startScripts.classpath
+}
 
 task remoteDeploy(dependsOn: installDist) {
     doLast {
@@ -208,6 +215,8 @@ distributions {
 
             //ADDED by JSoares -> copy Zermia configuration file into build/install/library
             from 'coordinator.config'
+            from 'schedule.yaml'
+            from 'schedule.json'
         }
     }
 }

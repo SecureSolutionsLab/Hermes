@@ -1,109 +1,192 @@
-# Byzantine Fault-Tolerant (BFT) State Machine Replication (SMaRt) v1.2
 
-This is a Byzantine fault-tolerant state machine replication project named BFT-SMaRt, a Java open source library maintained by the LaSIGE research unit at the University of Lisbon.
+# Hermes Fault Injector framework
 
-This package contains the source code (src/), jar file (bin/BFT-SMaRt.jar), dependencies (lib/), documentation (doc/), running scripts (runscripts/), and configuration files (config/) for version 1.2 of the project.
-BFT-SMaRt requires the Java Runtime Environment version 1.8 or later.
+This is a fault injection framework designed to inject faults into Byzantine Fault Tolerant (BFT) protocols.
 
-## Quick start
+It allows users to define a set of faults (referred to as fault schedule) that are injected into the target application at runtime.
 
-To run any demonstration you first need to configure BFT-SMaRt to define the protocol behavior and the location of each replica.
+## Design
 
-The servers must be specified in the configuration file (see `config/hosts.config`):
+The Hermes fault injection framework is designed to test and validate BFT protocols/applications.
+It monitors the state of the protocol's replicas and clients and manages fault injection based on their state.
 
-```
-#server id, address and port (the ids from 0 to n-1 are the service replicas) 
-0 127.0.0.1 11000 11001
-1 127.0.0.1 11010 11011
-2 127.0.0.1 11020 11021
-3 127.0.0.1 11030 11031
-```
+State monitoring is accomplished by Monitors. These attach to replicas and clients using Aspect Oriented Programming (AOP).
 
-**Important tip #1:** Always provide IP addresses instead of hostnames. If a machine running a replica is not correctly configured, BFT-SMaRt may fail to bind to the appropriate IP address and use the loopback address instead (127.0.0.1). This phenomenom may prevent latencyClients and/or replicas from successfully establishing a connection among them.
+A central Coordinator reads a user defined global fault schedule and is responsible for managing the monitors.
+Monitors register themselves with the Coordinator and retrieve their fault schedule.
 
-**Important tip #2:** Clients requests should not be issued before all replicas have been properly initialized. Replicas are ready to process client requests when each one outputs `-- Ready to process operations` in the console.
 
-The system configurations also have to be specified (see`config/system.config`). Most of the parameters are self explanatory.
+## Defining fault schedule
 
-**Important tip #3:** When using the library in real systems, always make sure to set `system.communication.defaultkeys` to `false` and `system.communication.useSignatures` to `1`. Also make sure that only the `config/keys` directory only has the private key for the repective replica/client.
+Users can define a global fault schedule using either a `.json` on `.yaml` file.
+A global fault schedule is a set of monitor configurations that include:
+- the monitor identifier;
+- the target bft replica/client it attaches to;
+- if it should notify/update the coordinator after each fault; and,
+- the monitor's fault schedule
 
-You can run the counter demonstration by executing the following commands, from within the main directory across four different consoles (4 replicas, to tolerate 1 fault):
+The structure of a fault schedule is presented next:
 
 ```
-./smartrun.sh bftsmart.demo.counter.CounterServer 0
-./smartrun.sh bftsmart.demo.counter.CounterServer 1
-./smartrun.sh bftsmart.demo.counter.CounterServer 2
-./smartrun.sh bftsmart.demo.counter.CounterServer 3
-```
+schedule:                         # a list of monitor information and respective fault schedules
+ - monitor_id: <id>
+   target: <relica/client id>
+   fault_schedule:
+     - fault_type: <fault type>
+       fault_trigger_conditions:  # the conditions required for injectig this fault
+         consensus_id: <consensus id>
+         view_id: <view id>
+         protocol: <protocol>
+         protocol_phase: <protocol_phase>
+       fault_arguments:           # additional arguments needed for each specific fault
+         ...
+         ... 
 
-**Important tip #4:** If you are getting timeout messages, it is possible that the application you are running takes too long to process the requests or the network delay is too high and PROPOSE messages from the leader does not arrive in time, so replicas may start the leader change protocol. To prevent that, try to increase the `system.totalordermulticast.timeout` parameter in 'config/system.config'.
-
-**Important tip #5:** Never forget to delete the `config/currentView` file after you modify `config/hosts.config` or `config/system.config`. If `config/currentView` exists, BFT-SMaRt always fetches the group configuration from this file first. Otherwise, BFT-SMaRt fetches information from the other files and creates `config/currentView` from scratch. Note that `config/currentView` only stores information related to the group of replicas. You do not need to delete this file if, for instance, you want to enable the debugger or change the value of the request timeout.
-
-Once all replicas are ready, the client can be launched as follows:
-
-```
-./smartrun.sh bftsmart.demo.counter.CounterClient 1001 <increment> [<number of operations>]
-```
-
-If `<increment>` equals 0 the request will be read-only. Default `<number of operations>` equals 1000.
-
-**Important tip #6:** always make sure that each client uses a unique ID. Otherwise, latencyClients may not be able to complete their operations.
-  
-## State transfer protocol(s)
-
-BFT-SMaRt offers two state transfer protocols. The first is a basic protocol that can be used by extending the classes `bftsmart.tom.server.defaultservices.DefaultRecoverable` and `bftsmart.tom.server.defaultservices.DefaultSingleRecoverable`. Thee classes logs requests into memory and periodically takes snapshots of the application state.
-
-The second, more advanced protocol can be used by extending the class 
-`bftsmart.tom.server.defaultservices.durability.DurabilityCoordinator`. This protocol stores its logs to disk. To mitigate the latency of writing to disk, such tasks is done in batches and in parallel with the requests' execution. Additionally, the snapshots are taken at different points of the execution in different replicas.
-
-**Important tip #7:** We recommend developers to use `bftsmart.tom.server.defaultservices.DefaultRecoverable`, since it is the most stable of the three classes.
-
-**Important tip #8:** regardless of the chosen protocol, developers must avoid using Java API objects like `HashSet` or `HashMap`, and use `TreeSet` or `TreeMap` instead. This is because serialization of Hash* objects is not deterministic, i.e, it generates different byte arrays for equal objects. This will lead to problems after more than `f` replicas used the state transfer protocol to recover from failures.
-
-## Group reconfiguration
-
-The library also implements a reconfiguration protocol that can be used to add/remove replicas from the initial group. You can add/remove replicas on-the-fly by executing the following commands:
 
 ```
-./smartrun.sh bftsmart.reconfiguration.util.DefaultVMServices <smart id> <ip address> <port> (to add a replica to the group)
-./smartrun.sh bftsmart.reconfiguration.util.DefaultVMServices <smart id> (to remove a replica from the group)
-```
 
-**Important tip #9:** everytime you use the reconfiguration protocol, you must make sure that all replicas and the host where you invoke the above commands have the latest `config/currentView` file. The current implementation of BFT-SMaRt does not provide any mechanism to distribute this file, so you will need to distribute it on your own (e.g., using the `scp` command). You also need to make sure that any client that starts executing can read from the latest `config/currentView` file.
-
-## BFT-SMaRt under crash monitor.faults
-
-You can run BFT-SMaRt in crash-monitor.faults only mode by setting the `system.bft` parameter in the configuration file to `false`. This mode requires less replicas to execute, but will not withstand full Byzantine behavior from compromised replicas.
-
-## Generating public/private key pairs
-
-If you need to generate public/private keys for more replicas or latencyClients, you can use the following command:
+An example of a Fault Schedule presented next:
 
 ```
-./smartrun.sh bftsmart.tom.util.RSAKeyPairGenerator <id> <key size>
+schedule:
+  - monitor_id: 0
+    target: replica_0
+    fault_schedule:
+      - fault_type: DelayFault      # delay message fault
+        fault_trigger_conditions:
+          consensus_id: 80
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'PROPOSE'
+        fault_arguments:
+          delay_duration: 1000      # amount of time to delay the replica
+          consecutive_rounds: 20    # number of consecutive rounds 
+      - fault_type: DropFault       # drop message fault
+        fault_trigger_conditions:
+          consensus_id: 100
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'PROPOSE'
+        fault_arguments:
+          to: 2
+          consecutive_rounds: 20
+      - fault_type: DropFault       # drop message fault
+        fault_trigger_conditions:
+          consensus_id: 100
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'WRITE'
+        fault_arguments:
+          to: 2
+          consecutive_rounds: 20
+      - fault_type: DropFault       # drop message fault
+        fault_trigger_conditions:
+          consensus_id: 100
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'ACCEPT'
+        fault_arguments:
+          to: 2
+          consecutive_rounds: 20
+      - fault_type: DuplicateFault  # duplicate message fault
+        fault_trigger_conditions:
+          consensus_id: 101
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'PROPOSE'
+        fault_arguments:
+          to: 3
+          consecutive_rounds: 20
+      - fault_type: CrashFault      # crash node fault
+        fault_trigger_conditions:
+          consensus_id: 105
+  - monitor_id: 1
+    target: replica_1
+    fault_schedule:
+      - fault_type: DelayFault
+        fault_trigger_conditions:
+          consensus_id: 80
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'WRITE'
+        fault_arguments:
+          delay_duration: 1000
+          consecutive_rounds: 20
+  - monitor_id: 2
+    target: replica_2
+    fault_schedule: []              # empty fault schedule
+  - monitor_id: 3
+    target: replica_3
+    fault_schedule: []              # empty fault schedule
+  - monitor_id: 1001
+    target: client_1001
+    fault_schedule:
+      - fault_type: Only2Primary
+        fault_trigger_conditions:
+          consensus_id: 80
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'REQUEST'
+      - fault_type: Only2Secondaries
+        fault_trigger_conditions:
+          consensus_id: 81
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'REQUEST'
+
 ```
 
-Keys are stored in the `config/keys` folder. The command above creates key pairs both for latencyClients and replicas. Alternatively, you can set the `system.communication.defaultkeys` to `true` in the `config/system.config` file to forces all processes to use the same public/private keys pair and secret key. This is useful when deploying experiments and benchmarks, because it enables the programmer to avoid generating keys for all principals involved in the system. However, this must not be used in a real deployments.
+
+## Code
+
+`src/proto/` - Coordinator services definitions
+
+`src/java/zermia/` - fault injection framework
+
+`src/java/bftsmart/` - target BFT protocol/application (in this case BFT-SMaRt) 
 
 ## Compiling
 
-**Before the integration of `gradle` (up to the commit `0f2d407`):**
+Type `./gradlew build` in the main directory to build the project. The required jar files and default configuration files will be available in the `build/install/library` directory.
 
-Make sure that you have Ant installed and simply type `ant` in the main directory. The jar file is stored in the `bin/` directory.
+Type `./gradlew localDeploy` in the main directory to locally deploy the project.
 
-**With `gradle` (after the commit `0f2d407`):**
+Type `./gradlew installDist` in the main directory to locally install Hermes.
 
-Type `./gradlew installDist` in the main directory. The required jar files and default configuration files will be available in the `build/install/library` directory.
 
-**WARNING:** You might need to give execution permission to the `gradlew` script.
+## Running 
+
+- __Use bft_home environment variable for handling bft_smart path__
+> `export bft_home="path/to/project"`
+
+- __Coordinator__
+
+> `java -Duser.dir="$bft_home/build/install/library/" -Djava.security.properties="$bft_home/build/install/library/config/java.security" -Dlogback.configurationFile="$bft_home/build/install/library/config/logback.xml" -cp ".:$bft_home/build/install/library/:$bft_home/build/install/library/lib/*" zermia.coordinator.ZermiaCoordinatorMain schedule.yaml`
+
+- __Running a modified version of BFTCounterClient test (original -> single threaded; new -> multithreaded)__
+
+- __Server 0__
+> `java -Duser.dir="$bft_home/build/local/rep0/" -Djava.security.properties="$bft_home/build/local/rep0/config/java.security" -Dlogback.configurationFile="$bft_home/build/local/rep0/config/logback.xml" -cp ".:$bft_home/build/local/rep0/:$bft_home/build/local/rep0/lib/*" bftsmart.demo.counter.BFTCounterServer 0`
+
+- __Server 1__
+> `java -Duser.dir="$bft_home/build/local/rep1/" -Djava.security.properties="$bft_home/build/local/rep1/config/java.security" -Dlogback.configurationFile="$bft_home/build/local/rep1/config/logback.xml" -cp ".:$bft_home/build/local/rep1/:$bft_home/build/local/rep1/lib/*" bftsmart.demo.counter.BFTCounterServer 1`
+
+- __Server 2__
+> `java -Duser.dir="$bft_home/build/local/rep2/" -Djava.security.properties="$bft_home/build/local/rep2/config/java.security" -Dlogback.configurationFile="$bft_home/build/local/rep2/config/logback.xml" -cp ".:$bft_home/build/local/rep2/:$bft_home/build/local/rep2/lib/*" bftsmart.demo.counter.BFTCounterServer 2`
+
+- __Server 1__
+> `java -Duser.dir="$bft_home/build/local/rep3/" -Djava.security.properties="$bft_home/build/local/rep3/config/java.security" -Dlogback.configurationFile="$bft_home/build/local/rep3/config/logback.xml" -cp ".:$bft_home/build/local/rep3/:$bft_home/build/local/rep3/lib/*" bftsmart.demo.counter.BFTCounterServer 3`
+
+- __Client__
+> `CounterClient <client id> <increment value> [<number of operations>] [<number of clients>]`
+
+
+> `java -Duser.dir="$bft_home/build/local/cli0/" -Djava.security.properties="$bft_home/build/local/cli0/config/java.security" -Dlogback.configurationFile="$bft_home/build/local/cli0/config/logback.xml" -cp ".:$bft_home/build/local/cli0/:$bft_home/build/local/cli0/lib/*" bftsmart.demo.counter.CounterClient 1001 1 100 3`
+
+
+
+
 
 ## Additional information and publications
-
-If you are interested in learning more about BFT-SMaRt, you can read:
-
-- The paper about its state machine protocol published in [EDCC'12](http://www.di.fc.ul.pt/~bessani/publications/edcc12-modsmart.pdf):
-- The paper about its advanced state transfer protocol published in [Usenix'13](http://www.di.fc.ul.pt/~bessani/publications/usenix13-dsmr.pdf):
-- The tool description published in [DSN'14](http://www.di.fc.ul.pt/~bessani/publications/dsn14-bftsmart.pdf):
 
 ***Feel free to contact us if you have any questions!***

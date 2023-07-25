@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 public class CoordinatorConfiguration {
-	public static final Path defaultPath = FileSystems.getDefault().getPath("").toAbsolutePath();
+	public static final Path defaultPath = FileSystems.getDefault().getPath(System.getProperty("user.dir")).toAbsolutePath();
 	public static String defaultPropertiesFilePath = defaultPath + "/coordinator.config";
 	private static final Properties props = new Properties();
 	public CoordinatorConfiguration() {
@@ -21,11 +21,13 @@ public class CoordinatorConfiguration {
 		try {
 			props.load(new FileInputStream(propPath));
 		} catch (FileNotFoundException e) {
-			System.out.println("Property File not found");
 			e.printStackTrace();
+			System.out.printf("Property File not found: %s\n", propPath);
+			System.exit(-1);
 		} catch (IOException e) {
-			System.out.println("Error Reading Properties File");
 			e.printStackTrace();
+			System.out.println("Error Reading Properties File");
+			System.exit(-1);
 		}
 	}
 	
