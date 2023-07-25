@@ -1,0 +1,2 @@
+#!/bin/bash
+java -Djava.security.properties="./config/java.security" -Dlogback.configurationFile="./config/logback.xml" -cp ".:lib/*" coordinator.ZermiaCoordinatorMain Replica 0 Crash 1 100 1 Replica 1 Crash 1 200 1

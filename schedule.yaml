@@ -1,0 +1,88 @@
+---
+schedule:
+  - monitor_id: 0
+    target: replica_0
+    notify_coordinator: false
+    update_coordinator: true
+    fault_schedule:
+      - fault_type: DelayFault #delay message fault
+        fault_trigger_conditions:
+          consensus_id: 80
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'PROPOSE'
+        fault_arguments:
+          delay_duration: 1000
+          consecutive_rounds: 20
+      - fault_type: DropFault #drop message fault
+        fault_trigger_conditions:
+          consensus_id: 100
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'PROPOSE'
+        fault_arguments:
+          to: 2
+          consecutive_rounds: 20
+      - fault_type: DropFault #drop message fault
+        fault_trigger_conditions:
+          consensus_id: 100
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'WRITE'
+        fault_arguments:
+          to: 2
+          consecutive_rounds: 20
+      - fault_type: DropFault #drop message fault
+        fault_trigger_conditions:
+          consensus_id: 100
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'ACCEPT'
+        fault_arguments:
+          to: 2
+          consecutive_rounds: 20
+      - fault_type: DuplicateFault #duplicate message fault
+        fault_trigger_conditions:
+          consensus_id: 101
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'PROPOSE'
+        fault_arguments:
+          to: 3
+          consecutive_rounds: 20
+      - fault_type: CrashFault  #crash node fault
+        fault_trigger_conditions:
+          consensus_id: 105
+  - monitor_id: 1
+    target: replica_1
+    fault_schedule:
+      - fault_type: DelayFault
+        fault_trigger_conditions:
+          consensus_id: 80
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'WRITE'
+        fault_arguments:
+          delay_duration: 1000
+          consecutive_rounds: 20
+  - monitor_id: 2
+    target: replica_2
+    fault_schedule: []
+  - monitor_id: 3
+    target: replica_3
+    fault_schedule: []
+  - monitor_id: 1001
+    target: client_1001
+    fault_schedule:
+      - fault_type: Only2Primary
+        fault_trigger_conditions:
+          consensus_id: 80
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'REQUEST'
+      - fault_type: Only2Secondaries
+        fault_trigger_conditions:
+          consensus_id: 81
+          view_id: -1
+          protocol: 'CONSENSUS'
+          protocol_phase: 'REQUEST'

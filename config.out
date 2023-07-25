@@ -1,0 +1,259 @@
+general:
+  log_level: error #error warning info debug trace
+  stop_time: 500s
+  parallelism: 64
+  progress: false
+  model_unblocked_syscall_latency: true # Isto tem de estar a false NOT
+network:
+  graph:
+    type: 1_gbit_switch
+hosts:
+  coordinator:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/cli0/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/cli0/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/cli0/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/cli0/:/home/joaosoares/bft_smart-library-master/build/local/cli0/lib/*" coordinator.ZermiaCoordinatorMain Client 200 PNRS 1 100 100 Client 200 PNRS 2 200 200
+        start_time: 0s
+  replica0:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep0/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep0/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep0/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep0/:/home/joaosoares/bft_smart-library-master/build/local/rep0/lib/*" bftsmart.demo.ycsb.YCSBServer 0
+        start_time: 1s
+  replica1:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep1/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep1/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep1/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep1/:/home/joaosoares/bft_smart-library-master/build/local/rep1/lib/*" bftsmart.demo.ycsb.YCSBServer 1
+        start_time: 2s
+  replica2:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep2/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep2/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep2/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep2/:/home/joaosoares/bft_smart-library-master/build/local/rep2/lib/*" bftsmart.demo.ycsb.YCSBServer 2
+        start_time: 2s
+  replica3:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep3/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep3/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep3/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep3/:/home/joaosoares/bft_smart-library-master/build/local/rep3/lib/*" bftsmart.demo.ycsb.YCSBServer 3
+        start_time: 2s
+  replica4:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep4/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep4/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep4/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep4/:/home/joaosoares/bft_smart-library-master/build/local/rep4/lib/*" bftsmart.demo.ycsb.YCSBServer 4
+        start_time: 2s
+  replica5:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep5/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep5/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep5/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep5/:/home/joaosoares/bft_smart-library-master/build/local/rep5/lib/*" bftsmart.demo.ycsb.YCSBServer 5
+        start_time: 2s
+  replica6:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep6/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep6/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep6/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep6/:/home/joaosoares/bft_smart-library-master/build/local/rep6/lib/*" bftsmart.demo.ycsb.YCSBServer 6
+        start_time: 2s
+  replica7:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep7/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep7/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep7/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep7/:/home/joaosoares/bft_smart-library-master/build/local/rep7/lib/*" bftsmart.demo.ycsb.YCSBServer 7
+        start_time: 2s
+  replica8:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep8/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep8/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep8/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep8/:/home/joaosoares/bft_smart-library-master/build/local/rep8/lib/*" bftsmart.demo.ycsb.YCSBServer 8
+        start_time: 2s
+  replica9:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep9/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep9/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep9/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep9/:/home/joaosoares/bft_smart-library-master/build/local/rep9/lib/*" bftsmart.demo.ycsb.YCSBServer 9
+        start_time: 2s
+  replica10:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep10/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep10/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep10/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep10/:/home/joaosoares/bft_smart-library-master/build/local/rep10/lib/*" bftsmart.demo.ycsb.YCSBServer 10
+        start_time: 2s
+  replica11:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep11/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep11/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep11/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep11/:/home/joaosoares/bft_smart-library-master/build/local/rep11/lib/*" bftsmart.demo.ycsb.YCSBServer 11
+        start_time: 2s
+  replica12:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep12/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep12/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep12/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep12/:/home/joaosoares/bft_smart-library-master/build/local/rep12/lib/*" bftsmart.demo.ycsb.YCSBServer 12
+        start_time: 2s
+  replica13:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep13/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep13/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep13/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep13/:/home/joaosoares/bft_smart-library-master/build/local/rep13/lib/*" bftsmart.demo.ycsb.YCSBServer 13
+        start_time: 2s
+  replica14:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep14/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep14/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep14/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep14/:/home/joaosoares/bft_smart-library-master/build/local/rep14/lib/*" bftsmart.demo.ycsb.YCSBServer 14
+        start_time: 2s
+  replica15:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep15/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep15/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep15/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep15/:/home/joaosoares/bft_smart-library-master/build/local/rep15/lib/*" bftsmart.demo.ycsb.YCSBServer 15
+        start_time: 2s
+  client:
+    network_node_id: 0
+    options:
+      log_level: error
+    processes:
+      - path: java
+        args: -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/cli0/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/cli0/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/cli0/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/cli0/:/home/joaosoares/bft_smart-library-master/build/local/cli0/lib/*" com.yahoo.ycsb.Client -threads 200 -P /home/joaosoares/bft_smart-library-master/build/local/cli0/config/workloads/workloada -p measurementtype=timeseries -p timeseries.granularity=1000 -db bftsmart.demo.ycsb.YCSBClient -s
+        start_time: 50s
+ 
+ 
+zermia.numberOfClients=17
+zermia.client.ID.0=0
+zermia.client.ID.1=1
+zermia.client.ID.2=2
+zermia.client.ID.3=3
+zermia.client.ID.4=4
+zermia.client.ID.5=5
+zermia.client.ID.6=6
+zermia.client.ID.7=7
+zermia.client.ID.8=8
+zermia.client.ID.9=9
+zermia.client.ID.10=10
+zermia.client.ID.11=11
+zermia.client.ID.12=12
+zermia.client.ID.13=13
+zermia.client.ID.14=14
+zermia.client.ID.15=15
+zermia.client.ID.16=16
+ 
+ 
+0 replica0 11000 11001
+1 replica1 11010 11011
+2 replica2 11020 11021
+3 replica3 11030 11031
+4 replica4 11040 11041
+5 replica5 11050 11051
+6 replica6 11060 11061
+7 replica7 11070 11071
+8 replica8 11080 11081
+9 replica9 11090 11091
+10 replica10 11100 11101
+11 replica11 11110 11111
+12 replica12 11120 11121
+13 replica13 11130 11131
+14 replica14 11140 11141
+15 replica15 11150 11151
+ 
+ 
+system.servers.num = 16
+system.servers.f = 5
+system.initial.view = 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+system.totalordermulticast.timeout = 2000
+ 
+ 
+ 
+ 
+echo "Starting Coordinator";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/cli0/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/cli0/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/cli0/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/cli0/:/home/joaosoares/bft_smart-library-master/build/local/cli0/lib/*" coordinator.ZermiaCoordinatorMain Replica 0 Crash 1 2000 1 Replica 1 Crash 1 4000 1 Replica 2 Crash 1 6000 1 Replica 3 Crash 1 8000 1 Replica 4 Crash 1 10000 1 Replica 5 Crash 1 12000 1 Replica 6 Crash 1 14000 1 Replica 7 Crash 1 16000 1 Replica 8 Crash 1 18000 1 Replica 9 Crash 1 20000 1 > coordinator.stdout 2> coordinator.stderr &
+sleep 2;
+echo "Starting Replica 0";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep0/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep0/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep0/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep0/:/home/joaosoares/bft_smart-library-master/build/local/rep0/lib/*" bftsmart.demo.ycsb.YCSBServer 0 > replica0.stdout 2> replica0.stderr &
+sleep 1;
+echo "Starting Replica 1";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep1/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep1/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep1/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep1/:/home/joaosoares/bft_smart-library-master/build/local/rep1/lib/*" bftsmart.demo.ycsb.YCSBServer 1 > replica1.stdout 2> replica1.stderr &
+sleep 1;
+echo "Starting Replica 2";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep2/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep2/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep2/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep2/:/home/joaosoares/bft_smart-library-master/build/local/rep2/lib/*" bftsmart.demo.ycsb.YCSBServer 2 > replica2.stdout 2> replica2.stderr &
+sleep 1;
+echo "Starting Replica 3";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep3/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep3/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep3/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep3/:/home/joaosoares/bft_smart-library-master/build/local/rep3/lib/*" bftsmart.demo.ycsb.YCSBServer 3 > replica3.stdout 2> replica3.stderr &
+sleep 1;
+echo "Starting Replica 4";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep4/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep4/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep4/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep4/:/home/joaosoares/bft_smart-library-master/build/local/rep4/lib/*" bftsmart.demo.ycsb.YCSBServer 4 > replica4.stdout 2> replica4.stderr &
+sleep 1;
+echo "Starting Replica 5";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep5/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep5/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep5/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep5/:/home/joaosoares/bft_smart-library-master/build/local/rep5/lib/*" bftsmart.demo.ycsb.YCSBServer 5 > replica5.stdout 2> replica5.stderr &
+sleep 1;
+echo "Starting Replica 6";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep6/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep6/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep6/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep6/:/home/joaosoares/bft_smart-library-master/build/local/rep6/lib/*" bftsmart.demo.ycsb.YCSBServer 6 > replica6.stdout 2> replica6.stderr &
+sleep 1;
+echo "Starting Replica 7";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep7/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep7/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep7/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep7/:/home/joaosoares/bft_smart-library-master/build/local/rep7/lib/*" bftsmart.demo.ycsb.YCSBServer 7 > replica7.stdout 2> replica7.stderr &
+sleep 1;
+echo "Starting Replica 8";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep8/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep8/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep8/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep8/:/home/joaosoares/bft_smart-library-master/build/local/rep8/lib/*" bftsmart.demo.ycsb.YCSBServer 8 > replica8.stdout 2> replica8.stderr &
+sleep 1;
+echo "Starting Replica 9";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep9/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep9/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep9/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep9/:/home/joaosoares/bft_smart-library-master/build/local/rep9/lib/*" bftsmart.demo.ycsb.YCSBServer 9 > replica9.stdout 2> replica9.stderr &
+sleep 1;
+echo "Starting Replica 10";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep10/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep10/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep10/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep10/:/home/joaosoares/bft_smart-library-master/build/local/rep10/lib/*" bftsmart.demo.ycsb.YCSBServer 10 > replica10.stdout 2> replica10.stderr &
+sleep 1;
+echo "Starting Replica 11";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep11/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep11/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep11/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep11/:/home/joaosoares/bft_smart-library-master/build/local/rep11/lib/*" bftsmart.demo.ycsb.YCSBServer 11 > replica11.stdout 2> replica11.stderr &
+sleep 1;
+echo "Starting Replica 12";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep12/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep12/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep12/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep12/:/home/joaosoares/bft_smart-library-master/build/local/rep12/lib/*" bftsmart.demo.ycsb.YCSBServer 12 > replica12.stdout 2> replica12.stderr &
+sleep 1;
+echo "Starting Replica 13";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep13/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep13/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep13/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep13/:/home/joaosoares/bft_smart-library-master/build/local/rep13/lib/*" bftsmart.demo.ycsb.YCSBServer 13 > replica13.stdout 2> replica13.stderr &
+sleep 1;
+echo "Starting Replica 14";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep14/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep14/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep14/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep14/:/home/joaosoares/bft_smart-library-master/build/local/rep14/lib/*" bftsmart.demo.ycsb.YCSBServer 14 > replica14.stdout 2> replica14.stderr &
+sleep 1;
+echo "Starting Replica 15";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/rep15/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/rep15/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/rep15/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/rep15/:/home/joaosoares/bft_smart-library-master/build/local/rep15/lib/*" bftsmart.demo.ycsb.YCSBServer 15 > replica15.stdout 2> replica15.stderr &
+sleep 1;
+sleep 25;
+echo "Starting Client";
+java -Duser.dir="/home/joaosoares/bft_smart-library-master/build/local/cli0/" -Djava.security.properties="/home/joaosoares/bft_smart-library-master/build/local/cli0/config/java.security" -Dlogback.configurationFile="/home/joaosoares/bft_smart-library-master/build/local/cli0/config/logback.xml" -cp ".:/home/joaosoares/bft_smart-library-master/build/local/cli0/:/home/joaosoares/bft_smart-library-master/build/local/cli0/lib/*" com.yahoo.ycsb.Client -threads 200 -P /home/joaosoares/bft_smart-library-master/build/local/cli0/config/workloads/workloada -p measurementtype=timeseries -p timeseries.granularity=1000 -db bftsmart.demo.ycsb.YCSBClient -s > client0.stdout 2> client0.stderr &
+sleep 250;
+echo "Terminating Experiment";
+killall java

@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package zermia.coordinator;
+
+service ZermiaCoordinatorServices{
+  rpc RegisterMonitor (Proto_MonitorRequest) returns (Proto_RegistrationReply) {}
+  rpc CanTrigger (Proto_FaultTriggers) returns (Proto_TriggerReply) {}
+}
+
+//----------------------------------------------------------------------------------//
+// Monitor Request
+// Input (Monitor -> Coordinator)
+// args:
+//    monitorID - this monitor identifier
+message Proto_MonitorRequest {
+  int32 monitorID = 1;
+}
+
+// Registration Reply
+// Output (Coordinator -> Monitor)
+// args:
+//    f - maximum number of tolerable faulty nodes
+//    N - total number of protocol nodes
+//    replicaStatus - if replica is faulty or not // not needed
+//    faultScheduleSize - number of faults this monitor should inject
+//    faultSchedule - list of faults this monitor should inject
+message Proto_RegistrationReply {
+
+  message Proto_FaultDescription {
+    message Proto_TriggerConditions {
+      int32 consensus_id = 1; // state
+      int32 view_id = 2; // state
+      string protocol = 3; // state
+      string protocol_phase = 4; // state
+    }
+    message Proto_FaultArguments {
+      int32 firstArg = 1;
+      int32 consecutive_rounds = 2; // args
+    }
+    string fault_type=1;
+    Proto_TriggerConditions trigger_conditions = 2;
+    Proto_FaultArguments fault_arguments = 3;
+  }
+
+  int32 f = 1;
+  int32 N = 2;
+  bool replica_status = 3;
+  int32 fault_schedule_size = 4;
+  repeated Proto_FaultDescription fault_schedule = 5;
+}
+
+//----------------------------------------------------------------------------------//
+message Proto_FaultTriggers {
+  int32 monitorID = 1;
+  int32 faultID = 2;
+}
+
+message Proto_TriggerReply {
+  bool trigger = 1;
+}
+
+//----------------------------------------------------------------------------------//

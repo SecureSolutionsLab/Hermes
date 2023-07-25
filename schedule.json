@@ -1,0 +1,66 @@
+{
+  "schedule": [
+    {
+      "monitor_id": 0,
+      "fault_schedule": [
+        {
+          "fault_type": "ThreadDelayFault",
+          "fault_trigger_conditions": {
+            "consensus_id": 500,
+            "view_id": -1,
+            "protocol_phase": "PRE-PREPARE",
+            "delay_duration": 100,
+            "consecutive_rounds": 20
+          }
+        },
+        {
+          "fault_type": "ThreadDelayFault",
+          "fault_trigger_conditions": {
+            "consensus_id": 600,
+            "view_id": -1,
+            "protocol_phase": "PRE-PREPARE",
+            "delay_duration": 100,
+            "consecutive_rounds": 20
+          }
+        },
+        {
+          "fault_type": "ThreadDelayFault",
+          "fault_trigger_conditions": {
+            "consensus_id": 700,
+            "view_id": -1,
+            "protocol_phase": "PRE-PREPARE",
+            "delay_duration": 100,
+            "consecutive_rounds": 20
+          }
+        },
+        {
+          "fault_type": "CrashFault",
+          "fault_trigger_conditions": {
+            "consensus_id": 800
+          }
+        }
+      ]
+    },
+    {
+      "monitor_id": 1,
+      "fault_schedule": [
+        {
+          "fault_type": "CrashFault",
+          "fault_trigger_conditions": {
+            "consensus_id": 900
+          }
+        }
+      ]
+    },
+    {
+      "monitor_id": 2,
+      "fault_schedule": [
+      ]
+    },
+    {
+      "monitor_id": 3,
+      "fault_schedule": [
+      ]
+    }
+  ]
+}
