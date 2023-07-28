@@ -31,23 +31,21 @@ public class FaultArgumentsDeserializer extends StdDeserializer<FaultArguments> 
             JsonStreamContext parsingContext = jp.getParsingContext();
             JsonStreamContext parent = parsingContext.getParent();
             FaultDescription currentValue = (FaultDescription)parent.getCurrentValue();
+            JsonNode node = jp.getCodec().readTree(jp);
+            int consecutive_rounds = (Integer) ((IntNode) node.get("consecutive_rounds")).numberValue();
             if(currentValue.getFault_type().equals("DelayFault")) {
-                JsonNode node = jp.getCodec().readTree(jp);
                 int delay_duration = (Integer) ((IntNode) node.get("delay_duration")).numberValue();
-                int consecutive_rounds = (Integer) ((IntNode) node.get("consecutive_rounds")).numberValue();
                 return new DelayFaultArguments(delay_duration, consecutive_rounds);
             } else if (currentValue.getFault_type().equals("DropFault")) {
-                JsonNode node = jp.getCodec().readTree(jp);
                 int to = (Integer) ((IntNode) node.get("to")).numberValue();
-                int consecutive_rounds = (Integer) ((IntNode) node.get("consecutive_rounds")).numberValue();
                 return new DropFaultArguments(to, consecutive_rounds);
             } else if (currentValue.getFault_type().equals("DuplicateFault")) {
-                JsonNode node = jp.getCodec().readTree(jp);
                 int to = (Integer) ((IntNode) node.get("to")).numberValue();
-                int consecutive_rounds = (Integer) ((IntNode) node.get("consecutive_rounds")).numberValue();
                 return new DuplicateFaultArguments(to, consecutive_rounds);
-            } else if(currentValue.getFault_type().equals("CrashFault")) {
+            } else if(currentValue.getFault_type().equals("CrashFault")) { // Crash faults do not have arguments
                 return null;
+            } else { // all faults have consecutive rounds argument
+                return new FaultArguments(consecutive_rounds);
             }
         } catch ( Exception e) {
             e.printStackTrace();

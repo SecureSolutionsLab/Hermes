@@ -71,16 +71,16 @@ public class ZermiaCoordinatorMain extends ZermiaCoordinatorServicesGrpc.ZermiaC
     public void registerMonitor(Proto_MonitorRequest request, StreamObserver<Proto_RegistrationReply> responseObserver) {
         Logger.getLogger(ZermiaCoordinatorServices_todelete.class.getName()).log(Level.INFO, "Connection Request from Replica number " + request.getMonitorID());
 
-        int monitorId = request.getMonitorID();
-        Client c = zermiaClients.get("Monitor"+monitorId);
+        int monitorID = request.getMonitorID();
+        Client c = zermiaClients.get("Monitor"+monitorID);
         List<FaultDescription> schedule = c.getFaultSchedule().getFault_schedule();
 
         Proto_RegistrationReply.Builder replyBuilder = Proto_RegistrationReply.newBuilder()
-                .setF(props.getN())
-                .setN(props.getF())
+                .setF(props.getF())
+                .setN(props.getN())
                 .setReplicaStatus(true)
                 .setFaultScheduleSize(schedule.size());
-
+        System.out.printf("%d, %d, %d, %d\n", monitorID, props.getF(), props.getN(), schedule.size());
         for (int i = 0;i < schedule.size(); i++) {
             FaultDescription crt = schedule.get(i);
             TriggerConditions crt_triggerConditions = crt.getFault_trigger_conditions();
@@ -137,6 +137,15 @@ public class ZermiaCoordinatorMain extends ZermiaCoordinatorServicesGrpc.ZermiaC
                         .setFaultType(crt.getFault_type())
                         .setTriggerConditions(protoTriggerConditions);
 
+                replyBuilder.addFaultSchedule(faultDecription_builder);
+            } else {
+                FaultArguments fa = (FaultArguments) crt.getFault_arguments();
+                Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.Builder protoFaultArguments = Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.newBuilder()
+                        .setConsecutiveRounds(fa.getConsecutive_rounds());
+                Proto_RegistrationReply.Proto_FaultDescription.Builder faultDecription_builder = Proto_RegistrationReply.Proto_FaultDescription.newBuilder()
+                        .setFaultType(crt.getFault_type())
+                        .setTriggerConditions(protoTriggerConditions)
+                        .setFaultArguments(protoFaultArguments);
                 replyBuilder.addFaultSchedule(faultDecription_builder);
             }
         }

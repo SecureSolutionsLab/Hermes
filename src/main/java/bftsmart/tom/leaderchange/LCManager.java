@@ -64,7 +64,6 @@ public class LCManager {
     private final ServerViewController SVController;
     private final MessageDigest md;
     private final TOMLayer tomLayer;
-    
     private int currentLeader;
     //private Cipher cipher;
     
@@ -901,5 +900,10 @@ public class LCManager {
         }
         
         return (count > this.SVController.getCurrentViewF() ? ets : -1);
+    }
+
+    // ADDED: JSoares for Zermia
+    public int getCurrentLeader() {
+        return currentLeader;
     }
 }

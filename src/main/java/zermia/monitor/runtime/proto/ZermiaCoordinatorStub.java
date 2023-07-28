@@ -55,9 +55,9 @@ public class ZermiaCoordinatorStub {
 		ret.isFaulty = reply.getReplicaStatus();
 		ret.schedule = new LinkedList<>();
 		int faultScheduleSize = reply.getFaultScheduleSize();
+		System.out.printf("%d, %d, %d, %d", monitorID, reply.getF(), reply.getN(), faultScheduleSize);
 		for(int i = 0; i < faultScheduleSize; i++) {
 			try {
-
 				Proto_RegistrationReply.Proto_FaultDescription proto_faultDescription = reply.getFaultSchedule(i);
 				Proto_RegistrationReply.Proto_FaultDescription.Proto_TriggerConditions proto_triggerConditions = proto_faultDescription.getTriggerConditions();
 				Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments proto_faultArguments = proto_faultDescription.getFaultArguments();
@@ -78,6 +78,8 @@ public class ZermiaCoordinatorStub {
 					crt_faultArguments = new DuplicateFaultArguments(proto_faultArguments.getFirstArg(), proto_faultArguments.getConsecutiveRounds());
 				} else if (proto_faultDescription.getFaultType().equals("CrashFault")) {
 
+				} else {
+					crt_faultArguments = new FaultArguments(proto_faultArguments.getConsecutiveRounds());
 				}
 
 				//Rebuild FaultDescription for current Fault

@@ -83,13 +83,14 @@ public class BFTSmartReplicaState extends ReplicaState {
     @Override
     public String toString() {
         return "BFTSmartReplicaState{" +
-                "crtConsensusID=" + crtConsensusID +
+                "id=" + id +
+                ", crtConsensusID=" + crtConsensusID +
                 ", lastConsensusID=" + lastConsensusID +
                 ", crtViewID=" + crtViewID +
                 ", crtPrimary=" + crtPrimary +
                 ", regency=" + regency +
-                ", crtProtocol='" + crtProtocol + '\'' +
-                ", crtProtocolPhase='" + crtProtocolPhase + '\'' +
+                ", crtProtocol='" + crtProtocol + "'" +
+                ", crtProtocolPhase='" + crtProtocolPhase + "'" +
                 ", leader=" + leader +
                 '}';
     }

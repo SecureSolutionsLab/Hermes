@@ -1,6 +1,7 @@
 package zermia.monitor.runtime.bftsmart;
 
 import zermia.common.schedule.FaultDescription;
+import zermia.monitor.runtime.MonitorRuntime;
 import zermia.monitor.state.NodeState;
 import zermia.monitor.state.bftsmart.BFTSmartApplicationState;
 
@@ -8,12 +9,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class BFTSmartMonitor extends zermia.monitor.runtime.MonitorRuntime {
+public class BFTSmartMonitor extends MonitorRuntime {
     public BFTSmartMonitor(int id) {
         super(id);
-        if(zermia.monitor.runtime.MonitorRuntime.monitorRuntime == null) {
+        if(MonitorRuntime.monitorRuntime == null) {
             Logger.getLogger(zermia.monitor.runtime.MonitorRuntime.class.getName()).log(Level.INFO, "Instantiating new MonitorRuntime on replica: " + id);
-            zermia.monitor.runtime.MonitorRuntime.monitorRuntime = this;
+            MonitorRuntime.monitorRuntime = this;
         }
     }
 

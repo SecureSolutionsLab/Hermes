@@ -3,11 +3,12 @@ package zermia.monitor.state.bftsmart;
 import zermia.monitor.state.ClientState;
 
 public class BFTSmartClientState extends ClientState {
-    private int operationID; // this client's current operation ID
-    private int viewID; // view/epoch ID
-    private int sequenceID; //  this client's current sequence ID
-    private int lastMessageID; //  this client last Request's message ID
-    private String lastProtocolPhase = ""; // protocol phase - pre-prepare, prepare, commit, etc.
+    private int operationID = -1; // this client's current operation ID
+    private int viewID = -1; // view/epoch ID
+    private int sequenceID = -1; //  this client's current sequence ID
+    private int lastMessageID = -1; //  this client last Request's message ID
+    private String protocolPhase = ""; // protocol phase - pre-prepare, prepare, commit, etc.
+    private int crtPrimary = -1;
 
     public BFTSmartClientState(int id) {
         super(id);
@@ -45,22 +46,32 @@ public class BFTSmartClientState extends ClientState {
         this.lastMessageID = lastMessageID;
     }
 
-    public String getLastProtocolPhase() {
-        return lastProtocolPhase;
+    public String getProtocolPhase() {
+        return protocolPhase;
     }
 
-    public void setLastProtocolPhase(String lastProtocolPhase) {
-        this.lastProtocolPhase = lastProtocolPhase;
+    public void setProtocolPhase(String protocolPhase) {
+        this.protocolPhase = protocolPhase;
+    }
+
+    public int getCrtPrimary() {
+        return crtPrimary;
+    }
+
+    public void setCrtPrimary(int crtPrimary) {
+        this.crtPrimary = crtPrimary;
     }
 
     @Override
     public String toString() {
         return "BFTSmartClientState{" +
-                "operationID=" + operationID +
+                "id=" + id +
+                ", operationID=" + operationID +
                 ", viewID=" + viewID +
                 ", sequenceID=" + sequenceID +
                 ", lastMessageID=" + lastMessageID +
-                ", lastProtocolPhase=" + lastProtocolPhase +
+                ", protocolPhase='" + protocolPhase + "'" +
+                ", crtPrimary=" + crtPrimary +
                 '}';
     }
 }

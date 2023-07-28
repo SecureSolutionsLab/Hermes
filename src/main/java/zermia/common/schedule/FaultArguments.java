@@ -1,6 +1,6 @@
 package zermia.common.schedule;
 
-public abstract class FaultArguments {
+public class FaultArguments {
     protected int consecutive_rounds = 0;
 
     public FaultArguments(int consecutive_rounds) {

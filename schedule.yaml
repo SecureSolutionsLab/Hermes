@@ -50,9 +50,9 @@ schedule:
         fault_arguments:
           to: 3
           consecutive_rounds: 20
-      - fault_type: CrashFault  #crash node fault
-        fault_trigger_conditions:
-          consensus_id: 105
+#      - fault_type: CrashFault  #crash node fault
+#        fault_trigger_conditions:
+#          consensus_id: 105
   - monitor_id: 1
     target: replica_1
     fault_schedule:
@@ -74,15 +74,23 @@ schedule:
   - monitor_id: 1001
     target: client_1001
     fault_schedule:
-      - fault_type: Only2Primary
+      - fault_type: RequestPrimaryOnly
         fault_trigger_conditions:
           consensus_id: 80
           view_id: -1
           protocol: 'CONSENSUS'
           protocol_phase: 'REQUEST'
-      - fault_type: Only2Secondaries
+        fault_arguments:
+          consecutive_rounds: 20
+      - fault_type: RequestSecondariesOnly
         fault_trigger_conditions:
           consensus_id: 81
           view_id: -1
           protocol: 'CONSENSUS'
           protocol_phase: 'REQUEST'
+        fault_arguments:
+          consecutive_rounds: 20
+  - monitor_id: 1002
+    target: client_1002
+    fault_schedule: []
+

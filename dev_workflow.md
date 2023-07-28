@@ -10,57 +10,101 @@
 >  - __Global Fault schedule Parsing__ - Done (x)
 >  - Coordinator Service implementation - Partial
 >    - register - Done (x)
->    - notify - 
->    - injectFault - On going ()
+>    - notify - ()
+>    - injectFault - ()
 >
 > 
 >- __MonitorRuntime Implementation__ - Partial
 >  - Registration process - Done(x)
->  - App State Monitoring - Done (x)
+>  - App State Monitoring - Partial ()
+>    - Replica - Partial ()
+>      - Consensus - Done (x)
+>      - Leader Election / View Change - ()
+>      - Checkpoint - ()
+>      - Recovery - ()
+>    - Client - On going ()
 >  - Monitor Fault Schedule - Partial
 >    - init - Done (x)
+>    - injectFault - ()
+>      - Replica - ()
+>      - Client - ()
+>  - Monitor Fault Triggering - 
 >    - injectFault - On going ()
->  - Monitor Schedule triggering - 
->    - injectFault - On going ()
+>      - Replica - Done (x)
+>      - Client - On going ()
 >
-> 
+>
 >- __Testing & Evaluation__
 
 ## Development History: 
 
-> __Current Task__
-> 
->  - Define the set of faults to implement (__on going__)
+> __Current Tasks__
+>
+> - Implement client faults (__on_going__)
+>   - ~~Client State Monitoring~~ (__done__)
+>   - ~~Client Fault Schedule Parsing~~ (__done__)
+>   - ~~Client Registering~~ (__done__)
+>   - Client Fault Injection (__on_going__)
+> - Implemented faults (__on_going__)
+>   - ~~Independent Faults~~ (__done__)
+>     - ~~Crash Node Fault~~ (__done__)
+>   - Network related faults
+>     - ~~Delay Message Fault~~ (__done__)
+>     - ~~Drop Message Fault~~ (__done__)
+>     - ~~Duplicate Message Fault~~ (__done__)
+>     - Reorder Message Fault
+>     - Corrupt Message Fault
+>   - Semantic Faults
+>     - ~~Send requests to primary only~~ (__done__)
+>     - ~~Send requests to secondary only~~ (__done__)
+>     - Send different requests to each replica
+>     - Send different requests to primary vs secondaries
+>     - Modify message fields (consensus_id, view_id, operations, response, etc.) 
+>
 
 > __Next Tasks__
 > 
-> - Get next fault based on current application state (__done__)
+> - Get next fault based on current application state (__partially done__)
 >   - Currently only target replica/client state is being for validating triggering conditions
-> - Implement client faults
+> - Define and implement the set of faults for each sub-protocol (view change/leader election, checkpoint, recovery)
 
 > __Concluded Tasks__
 >
-> - ~~Implement DropMessage & DuplicateMessage Faults (__done__)~~
-> - ~~Implement DelayMessage & NodeCrash Faults (__done__)~~
+> - ~~Define the set of faults to implement (__done__)~~
+> - ~~Implement Replica Inject Fault (__done__)~~
+>   - ~~Implement DropMessage & DuplicateMessage Faults (__done__)~~
+>   - ~~Implement DelayMessage & NodeCrash Faults (__done__)~~
 > - ~~Add Arguments to Faults (__done__)~~
 >   - ~~FaultDescription must include a set of arguments (__done__)~~
 >      - ~~Ex: {fault_type:type, fault_trigger_conditions:{}, fault_arguments:{}}~~
-> - ~~Evaluate triggering conditions~~
-> - ~~Determine next fault to inject based on node's current state~~
-> - ~~Implement node registration~~
-> - ~~Define Coordinator Service interface~~ 
+> - ~~Evaluate triggering conditions (__done__)~~
+>   - ~~Replicas (__done__)~~
+>   - ~~Clients (__done__)~~
+> - ~~Determine next fault to inject based on node's current state (__done__)~~
+>   - ~~Replicas (__done__)~~
+>   - ~~Clients (__done__)~~
+> - ~~Monitor application state (__done__)~~
+>   - ~~Replicas (__done__)~~
+>   - ~~Clients (__done__)~~
+> - ~~Implement node registration (__done__)~~
+>   - ~~Replicas (__done__)~~
+>   - ~~Clients (__done__)~~
+> - ~~Define Coordinator Service interface (__done__)~~
+>   - ~~Create Service Stubs and Skeletons (__done__)~~ 
 
-### What need to be done (_TODO_ )
+### What needs to be done (_TODO_ )
 
 > - __Design/Define Faults__ 
 >   - __Network/Communication based faults__
->     - Drop Message (__done__)
->     - Delay Message (__done__)
->     - Duplicate Message (__done__)
+>     - ~~Drop Message (__done__)~~
+>     - ~~Delay Message (__done__)~~
+>     - ~~Duplicate Message (__done__)~~
 >     - Corrupt Message 
 >     - Re-Order message (_Can this be "done" using a C_ID(x+1) on message(x) and C_ID(x) on message(x+1)?_)
 >   - __Semantic Faults__
 >     - Clients
+>       - ~~Send REQUEST message only to leader (__done__)~~
+>       - ~~Send REQUEST message only to non-leaders (__done__)~~
 >       - Send different REQUEST message to each/some Replica
 >     - Replicas
 >       - Leader/Primary
@@ -122,18 +166,23 @@ ___
 ### Update service description (ZermiaCoordinatorService.proto)
 
 - Add/remove/update service operations and messages (in `ZermiaCoordinatorService.proto` file)
-- Update corresponding "Java Objects" (zermia.common.schedule.*)
+- Update corresponding "Java Objects" (zermia.common.schedule.*) (see next section <a href="#faultparsing">Section</a>))
 - Update Coordinator Service implementation and Coordinator Service Stub accordingly
   - Coordinator Service implementation &rarr; [ZermiaCoordinatorMain.java](src%2Fmain%2Fjava%2Fzermia%2Fcoordinator%2FZermiaCoordinatorMain.java)
   - Coordinator Service Stub implementation &rarr; [ZermiaCoordinatorStub.java](src%2Fmain%2Fjava%2Fzermia%2Fmonitor%2Fruntime%2Fproto%2FZermiaCoordinatorStub.java)
 
 ___
 
-## Fault schedule parsing (Yaml file)
 
-- add/remove/update fault schedule description (yaml file) 
-- Update corresponding Java class in `common.schedule.*`
-- Add custom parser/deserializer if needed (see `zermia.common.schedule.arguments.serializer.FaultArgumentsDeserializer`)
+### <p id="faultparsing"> Fault schedule parsing (Yaml file)</p>
+
+- Define fault schedule description (to be included in `schedule.yaml` file)
+- Add/Remove/Update fault schedule description (yaml file) 
+- Create/Update corresponding Java class for mapping fault description to object in `common.schedule.*`
+- Add custom parser/serializer/deserializer if needed (see `zermia.common.schedule.arguments.serializer.FaultArgumentsDeserializer`)
+- Update Coordinator Service implementation and Coordinator Service Stub accordingly
+  - Coordinator Service implementation &rarr; [ZermiaCoordinatorMain.java](src%2Fmain%2Fjava%2Fzermia%2Fcoordinator%2FZermiaCoordinatorMain.java)
+  - Coordinator Service Stub implementation &rarr; [ZermiaCoordinatorStub.java](src%2Fmain%2Fjava%2Fzermia%2Fmonitor%2Fruntime%2Fproto%2FZermiaCoordinatorStub.java)
 ___
 ## BFT-SMaRt state monitoring (method mappings)
 

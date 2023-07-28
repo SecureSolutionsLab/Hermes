@@ -46,7 +46,18 @@ public class FaultDescription {
         if(crtState instanceof BFTSmartClientState) {
             BFTSmartClientState cltState = (BFTSmartClientState)crtState;
             if(trigger_conditions.getConsensus_id() == cltState.getOperationID()) {
-                // TODO implement client faults
+                return true;
+            }
+            if( ( trigger_conditions.getConsensus_id() == cltState.getOperationID() ||
+                    trigger_conditions.getConsensus_id() == cltState.getSequenceID() )&&
+                    trigger_conditions.getView_id() <= cltState.getViewID()) {
+//                System.out.printf("[FaultDescription].canTriggerFault(): %s - %s\n", trigger_conditions, crtState);
+                if(trigger_conditions.getProtocol().equals("null") && trigger_conditions.getProtocol_phase().equals("null")) {
+                    return true;
+                }
+                else {
+                    return trigger_conditions.getProtocol_phase().equals(cltState.getProtocolPhase());
+                }
             }
         }
         if(crtState instanceof BFTSmartReplicaState) {

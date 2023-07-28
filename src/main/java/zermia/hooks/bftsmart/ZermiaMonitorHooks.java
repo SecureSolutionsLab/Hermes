@@ -9,6 +9,7 @@ import bftsmart.consensus.messages.ConsensusMessage;
 import bftsmart.statemanagement.SMMessage;
 import bftsmart.tom.core.messages.ForwardedMessage;
 import bftsmart.tom.core.messages.TOMMessage;
+import bftsmart.tom.leaderchange.LCManager;
 import bftsmart.tom.leaderchange.LCMessage;
 import bftsmart.tom.util.TOMUtil;
 import org.aspectj.lang.JoinPoint;
@@ -17,6 +18,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import zermia.common.schedule.FaultArguments;
 import zermia.common.schedule.FaultDescription;
 import zermia.common.schedule.arguments.DelayFaultArguments;
 import zermia.common.schedule.arguments.DropFaultArguments;
@@ -45,6 +47,7 @@ public class ZermiaMonitorHooks {
     private int monitorID;
     private zermia.monitor.runtime.bftsmart.BFTSmartMonitor monitor = null;
     private boolean isReplica; // is this monitor associated with a Replica or a BFTClient?
+    private int crtLeader=-1;
 
     @Before("execution (* bftsmart.demo.counter.CounterClient.main*(..))")
     public void advice_clt_main(JoinPoint joinPoint) {
@@ -133,6 +136,42 @@ public class ZermiaMonitorHooks {
 
         } else if (sysMsg instanceof TOMMessage) { // Total Order Multicast Message
             TOMMessage tomMessage = (TOMMessage) sysMsg;
+
+            String protocolPhase = "";
+            switch(tomMessage.getReqType()) {
+                case ORDERED_REQUEST: {
+                    protocolPhase = "ORDERED_REQUEST";
+                    break;
+                }
+                case UNORDERED_REQUEST: {
+                    protocolPhase = "ORDERED_REQUEST";
+                    break;
+                }
+                case REPLY: {
+                    protocolPhase = "REPLY";
+                    break;
+                }
+                case RECONFIG: {
+                    protocolPhase = "RECONFIG";
+                    break;
+                }
+                case ASK_STATUS: {
+                    protocolPhase = "ASK_STATUS";
+                    break;
+                }
+                case STATUS_REPLY: {
+                    protocolPhase = "STATUS_REPLY";
+                    break;
+                }
+                case UNORDERED_HASHED_REQUEST: {
+                    protocolPhase = "UNORDERED_HASHED_REQUEST";
+                    break;
+                }
+                default: {
+
+                }
+            }
+
 //            System.out.printf("[ZermiaMonitorHooks] \t TOMMessage: from, %d\n", tomMessage.getSender());
 //            System.out.printf("[ZermiaMonitorHooks] \t TOMMessage: viewID, %d\n", tomMessage.getViewID());
 //            System.out.printf("[ZermiaMonitorHooks] \t TOMMessage: session, %d\n", tomMessage.getSession());
@@ -146,15 +185,11 @@ public class ZermiaMonitorHooks {
 //                System.out.printf("[ZermiaMonitorHooks] \t TOMMessage: reply, %s\n", "NULL");
             if (ms instanceof BFTSmartClientState) { // only executed by ReplicaMonitor
                 BFTSmartClientState state = (BFTSmartClientState) ms;
-                String protocolPhase = (tomMessage.getSender() == monitorID) ? "REPLY" : "REQUEST";
                 state.setViewID(tomMessage.getViewID());
                 state.setSequenceID(tomMessage.getSequence());
                 state.setOperationID(tomMessage.getOperationId());
-                // only updates lastMessageID on Requests
-                if( tomMessage.getSender() != monitorID )
-                    state.setLastMessageID(tomMessage.getId());
-
-                state.setLastProtocolPhase(protocolPhase);
+                state.setLastMessageID(tomMessage.getId());
+                state.setProtocolPhase(protocolPhase);
             } else if (ms instanceof BFTSmartReplicaState) { // only executed by ClientMonitor
                 BFTSmartReplicaState state = (BFTSmartReplicaState) ms;
                 if (tomMessage.getSequence() > state.getCrtConsensusID()) {
@@ -163,7 +198,6 @@ public class ZermiaMonitorHooks {
                     state.setCrtConsensusID(tomMessage.getSequence());
                     state.setCrtViewID(tomMessage.getViewID());
                     state.setCrtProtocol("CONSENSUS");
-                    String protocolPhase = (tomMessage.getSender() == monitorID) ? "REQUEST" : "REPLY";
                     state.setCrtProtocolPhase(protocolPhase);
                 }
             }
@@ -263,20 +297,20 @@ public class ZermiaMonitorHooks {
      * @throws Throwable
      */
     // bftsmart.communication.client.netty.NettyClientServerCommunicationSystemClientSide.send(boolean sign, int[] targets, TOMMessage sm)
-    @Before("execution (* bftsmart.communication.client.netty.NettyClientServerCommunicationSystemClientSide.send*(..))")
-    public void advice_c0(JoinPoint joinPoint) throws Throwable {
+    @Around("execution (* bftsmart.communication.client.netty.NettyClientServerCommunicationSystemClientSide.send*(..))")
+    public void advice_c0(ProceedingJoinPoint joinPoint) throws Throwable {
         NettyClientServerCommunicationSystemClientSide _this = (NettyClientServerCommunicationSystemClientSide) joinPoint.getThis();
 
-        int[] targets = (int[]) joinPoint.getArgs()[1];
+        Object[] args = joinPoint.getArgs();
+        int[] targets = (int[]) args[1];
         String to = "";
         for (int i = 0; i < targets.length; i++) {
             to += targets[i];
             if (i < (targets.length - 1))
                 to += ", ";
         }
-        SystemMessage sysMsg = (SystemMessage) joinPoint.getArgs()[2];
+        SystemMessage sysMsg = (SystemMessage) args[2];
         System.out.println("[ZermiaMonitorHooks] advice_c0 bftsmart.communication.client.netty.NettyClientServerCommunicationSystemClientSide.send - from: " + _this.getClientId() + "/" + sysMsg.getSender() + " to: " + to);
-
 
         ClientState state = monitor.getClientState(sysMsg.getSender());
         if (state == null) {
@@ -285,6 +319,43 @@ public class ZermiaMonitorHooks {
         }
         updateMonitorState(sysMsg, state);
 
+        FaultDescription fd = this.monitor.getNextFault2Inject();
+        if(fd != null) {
+            FaultArguments fa = (FaultArguments) fd.getFault_arguments();
+            ((BFTSmartClientState)state).setCrtPrimary(0);
+            System.out.printf("\t [ZermiaMonitorHooks] Triggering %s:\n", fd.getFault_type());
+            System.out.printf("\t [ZermiaMonitorHooks] Triggering Fault: %s \n", fd);
+            System.out.printf("\t [ZermiaMonitorHooks] Current State: %s \n", state);
+            switch (fd.getFault_type()) {
+                case "RequestPrimaryOnly": {
+                    try {
+                        args[1] = new int[]{((BFTSmartClientState)state).getCrtPrimary()};
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+                case "RequestSecondariesOnly": {
+                    try {
+                        int crtPrimary = ((BFTSmartClientState)state).getCrtPrimary();
+                        int[] newTarget = new int[targets.length-1];
+                        int j = 0;
+                        for (int i = 0; i < targets.length; i++) {
+                            if (targets[i] == crtPrimary)
+                                continue;
+                            newTarget[j] = targets[i];
+                            j++;
+                        }
+
+                        args[1] = newTarget;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+            }
+        }
+        joinPoint.proceed(args);
         //int nodeID = sysMsg.getSender();
         //zermia.monitor.runtime.MonitorRuntime monitor = zermia.monitor.runtime.MonitorRuntime.getInstance(nodeID);
     }
@@ -299,7 +370,8 @@ public class ZermiaMonitorHooks {
     @Before("execution (* bftsmart.tom.core.TOMLayer.requestReceived*(..))")
     public void advice_r1(JoinPoint joinPoint) throws Throwable {
         SystemMessage sysMsg = (SystemMessage) joinPoint.getArgs()[0];
-        //System.out.println("[ZermiaMonitorHooks] advice_r1 bftsmart.tom.core.TOMLayer.requestReceived: from: " + sysMsg.getSender());
+        TOMMessage msg = (TOMMessage)sysMsg;
+        System.out.printf("[ZermiaMonitorHooks] advice_r1 bftsmart.tom.core.TOMLayer.requestReceived (%d): from: \n", msg.getId(), sysMsg.getSender());
 
         ClientState state = monitor.getClientState(sysMsg.getSender());
         if (state == null) {
@@ -372,7 +444,7 @@ public class ZermiaMonitorHooks {
 
     /**
      * Replica Received Message from other Replica
-     * Only Called on a Replica Monitor
+     * Only Called by a Replica Monitor
      * @param joinPoint - join point for this advice
      * @throws Throwable
      */
@@ -380,7 +452,7 @@ public class ZermiaMonitorHooks {
     @Before("execution (* bftsmart.communication.MessageHandler.processData*(..))")
     public void advice_r3_r5_r7(JoinPoint joinPoint) throws Throwable {
         SystemMessage sysMsg = (SystemMessage) joinPoint.getArgs()[0];
-        System.out.printf("[ZermiaMonitorHooks] advice_r3_r5_r7 bftsmart.communication.MessageHandler.processData: %s from: %d\n", sysMsg, sysMsg.getSender());
+        System.out.printf("[ZermiaMonitorHooks] advice_r3_r5_r7 bftsmart.communication.MessageHandler.processData: %s(%s)\n", sysMsg.getClass().getSimpleName(), sysMsg);
 
         ReplicaState state = monitor.getReplicaState(sysMsg.getSender());
         if (state == null) {
@@ -444,7 +516,6 @@ public class ZermiaMonitorHooks {
         }
         updateMonitorState(sysMsg, state);
 
-        boolean proceed = true;
         FaultDescription fd = this.monitor.getNextFault2Inject();
         if(fd != null) {
             switch (fd.getFault_type()) {
@@ -513,8 +584,8 @@ public class ZermiaMonitorHooks {
 
         //TODO determine if any fault should be injected
 
-        if (proceed)
-            joinPoint.proceed(args);
+        joinPoint.proceed(args);
+
     }
 
 
@@ -541,6 +612,8 @@ public class ZermiaMonitorHooks {
     // bftsmart.tom.leaderchange.LCManager.setNewLeader(int leader)
     @Before("execution (* bftsmart.tom.leaderchange.LCManager.setNewLeader*(..))")
     public void advice4(JoinPoint jpoint) {
+        LCManager _this = (LCManager) jpoint.getThis();
+        crtLeader = (int) jpoint.getArgs()[0];
         //System.out.println("[ZermiaMonitorHooks] advice4 bftsmart.tom.leaderchange.LCManager.setNewLeader");
 
     }
@@ -548,6 +621,7 @@ public class ZermiaMonitorHooks {
     //---------------------------------------------------------------------------------//
     @AfterReturning(pointcut = "execution (* bftsmart.tom.core.ExecutionManager.getCurrentLeader*(..))", returning = "currentLeader")
     public void advice5(Object currentLeader) {
+        crtLeader = (int) currentLeader;
         //System.out.println("[ZermiaMonitorHooks] advice5 bftsmart.tom.core.ExecutionManager.getCurrentLeader");
 
     }
