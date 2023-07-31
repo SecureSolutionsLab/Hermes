@@ -3,8 +3,10 @@ package zermia.coordinator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.protobuf.ByteString;
 import zermia.common.schedule.*;
 import zermia.common.schedule.arguments.DelayFaultArguments;
+import zermia.common.schedule.arguments.DifferentRequestsToAllArguments;
 import zermia.common.schedule.arguments.DropFaultArguments;
 import zermia.common.schedule.arguments.DuplicateFaultArguments;
 import zermia.common.schedule.arguments.serializer.FaultArgumentsDeserializer;
@@ -102,8 +104,8 @@ public class ZermiaCoordinatorMain extends ZermiaCoordinatorServicesGrpc.ZermiaC
             if (crt.getFault_type().equals("DelayFault")) {
                 DelayFaultArguments dfa = (DelayFaultArguments) crt.getFault_arguments();
                 Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.Builder protoFaultArguments = Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.newBuilder()
-                        .setFirstArg(dfa.getDelayDuration())
-                        .setConsecutiveRounds(dfa.getConsecutive_rounds());
+                        .setConsecutiveRounds(dfa.getConsecutive_rounds())
+                        .setSecondArg(dfa.getDelayDuration());
                 Proto_RegistrationReply.Proto_FaultDescription.Builder faultDecription_builder = Proto_RegistrationReply.Proto_FaultDescription.newBuilder()
                         .setFaultType(crt.getFault_type())
                         .setTriggerConditions(protoTriggerConditions)
@@ -113,8 +115,8 @@ public class ZermiaCoordinatorMain extends ZermiaCoordinatorServicesGrpc.ZermiaC
             } else if (crt.getFault_type().equals("DropFault")) {
                 DropFaultArguments dfa = (DropFaultArguments) crt.getFault_arguments();
                 Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.Builder protoFaultArguments = Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.newBuilder()
-                        .setFirstArg(dfa.getTo())
-                        .setConsecutiveRounds(dfa.getConsecutive_rounds());
+                        .setConsecutiveRounds(dfa.getConsecutive_rounds())
+                        .setSecondArg(dfa.getTo());
                 Proto_RegistrationReply.Proto_FaultDescription.Builder faultDecription_builder = Proto_RegistrationReply.Proto_FaultDescription.newBuilder()
                         .setFaultType(crt.getFault_type())
                         .setTriggerConditions(protoTriggerConditions)
@@ -124,8 +126,8 @@ public class ZermiaCoordinatorMain extends ZermiaCoordinatorServicesGrpc.ZermiaC
             } else if (crt.getFault_type().equals("DuplicateFault")) {
                 DuplicateFaultArguments dfa = (DuplicateFaultArguments) crt.getFault_arguments();
                 Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.Builder protoFaultArguments = Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.newBuilder()
-                        .setFirstArg(dfa.getTo())
-                        .setConsecutiveRounds(dfa.getConsecutive_rounds());
+                        .setConsecutiveRounds(dfa.getConsecutive_rounds())
+                        .setSecondArg(dfa.getTo());
                 Proto_RegistrationReply.Proto_FaultDescription.Builder faultDecription_builder = Proto_RegistrationReply.Proto_FaultDescription.newBuilder()
                         .setFaultType(crt.getFault_type())
                         .setTriggerConditions(protoTriggerConditions)
@@ -138,8 +140,20 @@ public class ZermiaCoordinatorMain extends ZermiaCoordinatorServicesGrpc.ZermiaC
                         .setTriggerConditions(protoTriggerConditions);
 
                 replyBuilder.addFaultSchedule(faultDecription_builder);
+            } else if (crt.getFault_type().equals("DifferentRequestsToAll")) {
+                DifferentRequestsToAllArguments drtafa = (DifferentRequestsToAllArguments) crt.getFault_arguments();
+                Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.Builder protoFaultArguments = Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.newBuilder()
+                        .setConsecutiveRounds(drtafa.getConsecutive_rounds())
+                        .setSecondArg(drtafa.getTimestamp())
+                        .setThirdArg(ByteString.copyFrom(drtafa.getOperation()));
+                Proto_RegistrationReply.Proto_FaultDescription.Builder faultDecription_builder = Proto_RegistrationReply.Proto_FaultDescription.newBuilder()
+                        .setFaultType(crt.getFault_type())
+                        .setTriggerConditions(protoTriggerConditions)
+                        .setFaultArguments(protoFaultArguments);
+
+                replyBuilder.addFaultSchedule(faultDecription_builder);
             } else {
-                FaultArguments fa = (FaultArguments) crt.getFault_arguments();
+                FaultArguments fa = crt.getFault_arguments();
                 Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.Builder protoFaultArguments = Proto_RegistrationReply.Proto_FaultDescription.Proto_FaultArguments.newBuilder()
                         .setConsecutiveRounds(fa.getConsecutive_rounds());
                 Proto_RegistrationReply.Proto_FaultDescription.Builder faultDecription_builder = Proto_RegistrationReply.Proto_FaultDescription.newBuilder()
@@ -195,7 +209,7 @@ public class ZermiaCoordinatorMain extends ZermiaCoordinatorServicesGrpc.ZermiaC
         }
 
         GlobalFaultSchedule schedule = parseSchedule(scheduleFile);
-        System.out.printf("[ZermiaCoordinatorMain] global schedule: %s\n", schedule);
+        System.out.printf("[ZermiaCoordinatorMain] global schedule: \n \t %s \n", schedule);
         ZermiaCoordinatorMain coordinator = new ZermiaCoordinatorMain(schedule);
 
         try {

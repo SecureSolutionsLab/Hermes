@@ -5,7 +5,7 @@ import zermia.common.schedule.FaultArguments;
 public class DuplicateFaultArguments extends FaultArguments {
     private int to;
 
-    public DuplicateFaultArguments(int to, int consecutiveRounds) {
+    public DuplicateFaultArguments(int consecutiveRounds, int to) {
         super(consecutiveRounds);
         this.to = to;
     }

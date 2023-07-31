@@ -38,16 +38,16 @@ public class TOMMessage extends SystemMessage implements Externalizable, Compara
 	private TOMMessageType type; // request type: application or reconfiguration request
 	//******* EDUARDO END **************//
 
-	private int session; // Sequence number defined by the client
+	public int session; // Sequence number defined by the client
 	// Sequence number defined by the client.
 	// There is a sequence number for ordered and anothre for unordered messages
-	private int sequence;
-	private int operationId; // Sequence number defined by the client
+	public int sequence;
+	public int operationId; // Sequence number defined by the client
 
-	private byte[] content = null; // Content of the message
+	public byte[] content = null; // Content of the message
 
 	//the fields bellow are not serialized!!!
-	private transient int id; // ID for this message. It should be unique
+	public transient int id; // ID for this message. It should be unique
 
 	public transient long timestamp = 0; // timestamp to be used by the application
 

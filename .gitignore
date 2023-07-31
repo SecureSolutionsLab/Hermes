@@ -9,3 +9,14 @@ test
 
 # Ignore Gradle build output directory
 build
+
+# just a Java experiment file
+src/main/java/zermia/Experiments.java
+
+# previous classes not currently used
+src/main/java/zermia/common/stats/
+src/main/java/zermia/coordinator/proto/services/
+src/main/java/zermia/monitor/faults/
+src/main/java/zermia/monitor/runtime/proto/ZermiaMonitorChannel_todelete.java
+src/main/proto/ZermiaCoordinatorService.proto.old
+src/main/proto/ZermiaMonitorService.proto.to.delete

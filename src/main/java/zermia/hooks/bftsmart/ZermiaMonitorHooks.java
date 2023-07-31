@@ -12,6 +12,8 @@ import bftsmart.tom.core.messages.TOMMessage;
 import bftsmart.tom.leaderchange.LCManager;
 import bftsmart.tom.leaderchange.LCMessage;
 import bftsmart.tom.util.TOMUtil;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -21,6 +23,7 @@ import org.aspectj.lang.annotation.Before;
 import zermia.common.schedule.FaultArguments;
 import zermia.common.schedule.FaultDescription;
 import zermia.common.schedule.arguments.DelayFaultArguments;
+import zermia.common.schedule.arguments.DifferentRequestsToAllArguments;
 import zermia.common.schedule.arguments.DropFaultArguments;
 import zermia.common.schedule.arguments.DuplicateFaultArguments;
 import zermia.monitor.state.bftsmart.*;
@@ -29,6 +32,9 @@ import zermia.monitor.state.ClientState;
 import zermia.monitor.state.NodeState;
 
 import java.io.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Random;
 
 @Aspect
 public class ZermiaMonitorHooks {
@@ -300,9 +306,11 @@ public class ZermiaMonitorHooks {
     @Around("execution (* bftsmart.communication.client.netty.NettyClientServerCommunicationSystemClientSide.send*(..))")
     public void advice_c0(ProceedingJoinPoint joinPoint) throws Throwable {
         NettyClientServerCommunicationSystemClientSide _this = (NettyClientServerCommunicationSystemClientSide) joinPoint.getThis();
-
         Object[] args = joinPoint.getArgs();
+        boolean sign = (boolean) args[0];
         int[] targets = (int[]) args[1];
+        TOMMessage tommessage = (TOMMessage) args[2];
+
         String to = "";
         for (int i = 0; i < targets.length; i++) {
             to += targets[i];
@@ -353,8 +361,99 @@ public class ZermiaMonitorHooks {
                     }
                     break;
                 }
+                case "DifferentRequestsToAll": {
+                    DifferentRequestsToAllArguments drtafa = (DifferentRequestsToAllArguments) fd.getFault_arguments();
+
+                    int quorum;
+
+                    Integer[] targetArray = Arrays.stream(targets).boxed().toArray(Integer[]::new);
+                    Collections.shuffle(Arrays.asList(targetArray), new Random());
+
+                    if (_this.controller.getStaticConf().isBFT()) {
+                        quorum = (int) Math.ceil((_this.controller.getCurrentViewN() + _this.controller.getCurrentViewF()) / 2) + 1;
+                    } else {
+                        quorum = (int) Math.ceil((_this.controller.getCurrentViewN()) / 2) + 1;
+                    }
+                    _this.listener.waitForChannels(quorum); // wait for the previous transmission to complete
+                    _this.logger.debug("Sending request from " + tommessage.getSender() + " with sequence number " + tommessage.getSequence() + " to "
+                            + Arrays.toString(targetArray));
+                    int sent = 0;
+
+                    for (int target : targetArray) {
+                        TOMMessage sm_c = (TOMMessage) tommessage.clone();
+                        int length = drtafa.getOperation().length;
+                        byte[] newContents = drtafa.getOperation();
+                        sm_c.content[length-1] += newContents[length-1] + target;
+                        //sm_c.sequence -= target; //makes no sense changing as it will lead to dropping message
+                        //sm_c.operationId -= target; //makes no sense changing as it will lead to dropping message
+                        sm_c.session += target;
+                        if (sm_c.serializedMessage == null) {
+                            // serialize message
+                            DataOutputStream dos = null;
+                            try {
+                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                dos = new DataOutputStream(baos);
+                                sm_c.wExternal(dos);
+                                dos.flush();
+                                sm_c.serializedMessage = baos.toByteArray();
+                            } catch (IOException ex) {
+                                _this.logger.debug("Impossible to serialize message: " + tommessage);
+                            }
+                        }
+
+                        // Logger.println("Sending message with "+sm.serializedMessage.length+" bytes of
+                        // content.");
+
+                        // produce signature
+                        if (sign && sm_c.serializedMessageSignature == null) {
+                            sm_c.serializedMessageSignature = _this.signMessage(_this.privKey, sm_c.serializedMessage);
+                        }
+
+                        // This is done to avoid a race condition with the writeAndFush method. Since
+                        // the method is asynchronous,
+                        // each iteration of this loop could overwrite the destination of the previous
+                        // one
+                        try {
+                            TOMMessage sm = (TOMMessage) sm_c.clone();
+                        //Modified JSoares (targets[target] it does not make sense since targetArray was already shuffled)
+    //			sm.destination = targets[target];
+                            sm.destination = target;
+
+                            _this.rl.readLock().lock();
+                            //Modified JSoares (targets[target] it does not make sense since targetArray was already shuffled)
+    //			Channel channel = sessionClientToReplica.get(targets[target]).getChannel();
+                            Channel channel = _this.sessionClientToReplica.get(target).getChannel();
+                            _this.rl.readLock().unlock();
+                            if (channel.isActive()) {
+                                sm.signed = sign;
+                                ChannelFuture f = channel.writeAndFlush(sm);
+
+                                f.addListener(_this.listener);
+
+                                sent++;
+                            } else {
+                                //Modified JSoares (targets[target] it does not make sense since targetArray was already shuffled)
+    //				logger.debug("Channel to " + targets[target] + " is not connected");
+                                _this.logger.debug("Channel to " + target + " is not connected");
+                            }
+                        } catch (CloneNotSupportedException e) {
+                            _this.logger.error("Failed to clone TOMMessage", e);
+                            continue;
+                        }
+
+                    }
+
+                    if (targets.length > _this.controller.getCurrentViewF() && sent < _this.controller.getCurrentViewF() + 1) {
+                        // if less than f+1 servers are connected send an exception to the client
+                        throw new RuntimeException("Impossible to connect to servers!");
+                    }
+                    if (targets.length == 1 && sent == 0)
+                        throw new RuntimeException("Server not connected");
+                }
+                return;
             }
         }
+
         joinPoint.proceed(args);
         //int nodeID = sysMsg.getSender();
         //zermia.monitor.runtime.MonitorRuntime monitor = zermia.monitor.runtime.MonitorRuntime.getInstance(nodeID);
@@ -371,7 +470,7 @@ public class ZermiaMonitorHooks {
     public void advice_r1(JoinPoint joinPoint) throws Throwable {
         SystemMessage sysMsg = (SystemMessage) joinPoint.getArgs()[0];
         TOMMessage msg = (TOMMessage)sysMsg;
-        System.out.printf("[ZermiaMonitorHooks] advice_r1 bftsmart.tom.core.TOMLayer.requestReceived (%d): from: \n", msg.getId(), sysMsg.getSender());
+        System.out.printf("[ZermiaMonitorHooks] advice_r1 bftsmart.tom.core.TOMLayer.requestReceived (%d, %d, %d, %s): from: %d\n", msg.getId(), msg.getSequence(), msg.getOperationId(), Arrays.toString(msg.content), sysMsg.getSender());
 
         ClientState state = monitor.getClientState(sysMsg.getSender());
         if (state == null) {

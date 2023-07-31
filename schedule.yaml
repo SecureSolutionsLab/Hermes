@@ -4,67 +4,69 @@ schedule:
     target: replica_0
     notify_coordinator: false
     update_coordinator: true
-    fault_schedule:
-      - fault_type: DelayFault #delay message fault
-        fault_trigger_conditions:
-          consensus_id: 80
-          view_id: -1
-          protocol: 'CONSENSUS'
-          protocol_phase: 'PROPOSE'
-        fault_arguments:
-          delay_duration: 1000
-          consecutive_rounds: 20
-      - fault_type: DropFault #drop message fault
-        fault_trigger_conditions:
-          consensus_id: 100
-          view_id: -1
-          protocol: 'CONSENSUS'
-          protocol_phase: 'PROPOSE'
-        fault_arguments:
-          to: 2
-          consecutive_rounds: 20
-      - fault_type: DropFault #drop message fault
-        fault_trigger_conditions:
-          consensus_id: 100
-          view_id: -1
-          protocol: 'CONSENSUS'
-          protocol_phase: 'WRITE'
-        fault_arguments:
-          to: 2
-          consecutive_rounds: 20
-      - fault_type: DropFault #drop message fault
-        fault_trigger_conditions:
-          consensus_id: 100
-          view_id: -1
-          protocol: 'CONSENSUS'
-          protocol_phase: 'ACCEPT'
-        fault_arguments:
-          to: 2
-          consecutive_rounds: 20
-      - fault_type: DuplicateFault #duplicate message fault
-        fault_trigger_conditions:
-          consensus_id: 101
-          view_id: -1
-          protocol: 'CONSENSUS'
-          protocol_phase: 'PROPOSE'
-        fault_arguments:
-          to: 3
-          consecutive_rounds: 20
+    fault_schedule: []
+#    fault_schedule:
+#      - fault_type: DelayFault #delay message fault
+#        fault_trigger_conditions:
+#          consensus_id: 80
+#          view_id: -1
+#          protocol: 'CONSENSUS'
+#          protocol_phase: 'PROPOSE'
+#        fault_arguments:
+#          delay_duration: 1000
+#          consecutive_rounds: 20
+#      - fault_type: DropFault #drop message fault
+#        fault_trigger_conditions:
+#          consensus_id: 100
+#          view_id: -1
+#          protocol: 'CONSENSUS'
+#          protocol_phase: 'PROPOSE'
+#        fault_arguments:
+#          to: 2
+#          consecutive_rounds: 20
+#      - fault_type: DropFault #drop message fault
+#        fault_trigger_conditions:
+#          consensus_id: 100
+#          view_id: -1
+#          protocol: 'CONSENSUS'
+#          protocol_phase: 'WRITE'
+#        fault_arguments:
+#          to: 2
+#          consecutive_rounds: 20
+#      - fault_type: DropFault #drop message fault
+#        fault_trigger_conditions:
+#          consensus_id: 100
+#          view_id: -1
+#          protocol: 'CONSENSUS'
+#          protocol_phase: 'ACCEPT'
+#        fault_arguments:
+#          to: 2
+#          consecutive_rounds: 20
+#      - fault_type: DuplicateFault #duplicate message fault
+#        fault_trigger_conditions:
+#          consensus_id: 101
+#          view_id: -1
+#          protocol: 'CONSENSUS'
+#          protocol_phase: 'PROPOSE'
+#        fault_arguments:
+#          to: 3
+#          consecutive_rounds: 20
 #      - fault_type: CrashFault  #crash node fault
 #        fault_trigger_conditions:
 #          consensus_id: 105
   - monitor_id: 1
     target: replica_1
-    fault_schedule:
-      - fault_type: DelayFault
-        fault_trigger_conditions:
-          consensus_id: 80
-          view_id: -1
-          protocol: 'CONSENSUS'
-          protocol_phase: 'WRITE'
-        fault_arguments:
-          delay_duration: 1000
-          consecutive_rounds: 20
+    fault_schedule: []
+#    fault_schedule:
+#     - fault_type: DelayFault
+#       fault_trigger_conditions:
+#         consensus_id: 80
+#         view_id: -1
+#         protocol: 'CONSENSUS'
+#         protocol_phase: 'WRITE'
+#       fault_arguments:
+#         delay_duration: 1000
+#         consecutive_rounds: 20
   - monitor_id: 2
     target: replica_2
     fault_schedule: []
@@ -74,22 +76,52 @@ schedule:
   - monitor_id: 1001
     target: client_1001
     fault_schedule:
-      - fault_type: RequestPrimaryOnly
+      - fault_type: DifferentRequestsToAll
         fault_trigger_conditions:
-          consensus_id: 80
-          view_id: -1
+          consensus_id: 40 # this should be changed to operation_id (the number of operations this client has issued)
+          view_id: -1 # does not make sense
           protocol: 'CONSENSUS'
           protocol_phase: 'REQUEST'
         fault_arguments:
           consecutive_rounds: 20
-      - fault_type: RequestSecondariesOnly
-        fault_trigger_conditions:
-          consensus_id: 81
-          view_id: -1
-          protocol: 'CONSENSUS'
-          protocol_phase: 'REQUEST'
-        fault_arguments:
-          consecutive_rounds: 20
+          timestamp: -1
+          operation: [0,0,0,2]
+#          client_id: -1 ## does not make sense
+
+#      - fault_type: RequestPrimaryOnly
+#        fault_trigger_conditions:
+#          consensus_id: 80 # this should be changed to operation_id (the number of operations this client has issued)
+#          view_id: -1 # does not make sense
+#          protocol: 'CONSENSUS'
+#          protocol_phase: 'REQUEST'
+#        fault_arguments:
+#          consecutive_rounds: 20
+
+#      - fault_type: RequestSecondariesOnly
+#        fault_trigger_conditions:
+#          consensus_id: 81 # this should be changed to operation_id (the number of operations this client has issued)
+#          view_id: -1
+#          protocol: 'CONSENSUS'
+#          protocol_phase: 'REQUEST'
+#        fault_arguments:
+#          consecutive_rounds: 20
+
+#      - fault_type: DifferentRequestToPrimary # Clients do not have knowledge about the primary and non-primary replicas
+#        fault_trigger_conditions:
+#          consensus_id: 83 # this should be changed to operation_id (the number of operations this client has issued)
+#          view_id: -1 # does not make sense
+#          protocol: 'CONSENSUS'
+#          protocol_phase: 'REQUEST'
+#        fault_arguments:
+#          consecutive_rounds: 20
+#      - fault_type: DifferentRequestsToNonPrimary # Clients do not have knowledge about the primary and non-primary replicas
+#        fault_trigger_conditions:
+#          consensus_id: 84 # this should be changed to operation_id (the number of operations this client has issued)
+#          view_id: -1 # does not make sense
+#          protocol: 'CONSENSUS'
+#          protocol_phase: 'REQUEST'
+#        fault_arguments:
+#          consecutive_rounds: 20
   - monitor_id: 1002
     target: client_1002
     fault_schedule: []

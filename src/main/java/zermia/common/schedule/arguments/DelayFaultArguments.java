@@ -5,7 +5,7 @@ import zermia.common.schedule.FaultArguments;
 public class DelayFaultArguments extends FaultArguments {
     private int delayDuration;
 
-    public DelayFaultArguments(int delayDuration, int consecutiveRounds) {
+    public DelayFaultArguments(int consecutiveRounds, int delayDuration) {
         super(consecutiveRounds);
         this.delayDuration = delayDuration;
     }

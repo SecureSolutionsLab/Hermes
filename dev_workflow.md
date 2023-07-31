@@ -40,12 +40,12 @@
 
 > __Current Tasks__
 >
-> - Implement client faults (__on_going__)
+> - Implement client faults (__on going__)
 >   - ~~Client State Monitoring~~ (__done__)
 >   - ~~Client Fault Schedule Parsing~~ (__done__)
 >   - ~~Client Registering~~ (__done__)
->   - Client Fault Injection (__on_going__)
-> - Implemented faults (__on_going__)
+>   - Client Fault Injection (__on going__)
+> - Implemented faults (__on going__)
 >   - ~~Independent Faults~~ (__done__)
 >     - ~~Crash Node Fault~~ (__done__)
 >   - Network related faults
@@ -57,7 +57,7 @@
 >   - Semantic Faults
 >     - ~~Send requests to primary only~~ (__done__)
 >     - ~~Send requests to secondary only~~ (__done__)
->     - Send different requests to each replica
+>     - Send different requests to each replica (__on going__)
 >     - Send different requests to primary vs secondaries
 >     - Modify message fields (consensus_id, view_id, operations, response, etc.) 
 >
@@ -154,45 +154,22 @@ and also describes how service modifications should be implemented.
 - `proto.ZermiaCoordinatorService.proto` &rarr; gRPC Coordinator Service definition
 
 ___
-## Adding faults to framework
-
-- update FaultArgumentsDeserializer.java to deserialize new fault disc (yaml or json) to global/monitor fault schedule
-- Update ZermiaCoordinatorMain.java to serialize new fault
-- Update ZermiaCoordinatorStub.java to deserialize new fault 
-- Update ZermiaMonitorHooks.java to handle new fault
-
-## Modifying Coordinator Service protocol
-
-### Update service description (ZermiaCoordinatorService.proto)
-
-- Add/remove/update service operations and messages (in `ZermiaCoordinatorService.proto` file)
-- Update corresponding "Java Objects" (zermia.common.schedule.*) (see next section <a href="#faultparsing">Section</a>))
-- Update Coordinator Service implementation and Coordinator Service Stub accordingly
-  - Coordinator Service implementation &rarr; [ZermiaCoordinatorMain.java](src%2Fmain%2Fjava%2Fzermia%2Fcoordinator%2FZermiaCoordinatorMain.java)
-  - Coordinator Service Stub implementation &rarr; [ZermiaCoordinatorStub.java](src%2Fmain%2Fjava%2Fzermia%2Fmonitor%2Fruntime%2Fproto%2FZermiaCoordinatorStub.java)
-
-___
-
-
-### <p id="faultparsing"> Fault schedule parsing (Yaml file)</p>
-
+## Adding faults to Zermia framework & Modifying protocol
 - Define fault schedule description (to be included in `schedule.yaml` file)
-- Add/Remove/Update fault schedule description (yaml file) 
 - Create/Update corresponding Java class for mapping fault description to object in `common.schedule.*`
-- Add custom parser/serializer/deserializer if needed (see `zermia.common.schedule.arguments.serializer.FaultArgumentsDeserializer`)
+  - Add custom parser/serializer/deserializer if needed (see `zermia.common.schedule.arguments.serializer.FaultArgumentsDeserializer`) 
+  - 
+- Add/remove/update service operations and messages (in `ZermiaCoordinatorService.proto` file)
 - Update Coordinator Service implementation and Coordinator Service Stub accordingly
   - Coordinator Service implementation &rarr; [ZermiaCoordinatorMain.java](src%2Fmain%2Fjava%2Fzermia%2Fcoordinator%2FZermiaCoordinatorMain.java)
   - Coordinator Service Stub implementation &rarr; [ZermiaCoordinatorStub.java](src%2Fmain%2Fjava%2Fzermia%2Fmonitor%2Fruntime%2Fproto%2FZermiaCoordinatorStub.java)
-___
-## BFT-SMaRt state monitoring (method mappings)
 
+___
+## BFT-SMaRt state monitoring (method mappings, message types, and fault hooks)
 ![BFT-SMaRt Nodes Mapping](bft-smart_mapped_methods_nodes.png)
 
-
 methods mapped to extract state
-
 message.Send
-
 message.receive
 
 ![BFT-SMaRt Mapping](bft-smart_mapped_methods.png)

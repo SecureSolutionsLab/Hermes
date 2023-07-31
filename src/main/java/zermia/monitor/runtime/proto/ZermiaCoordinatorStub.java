@@ -6,6 +6,7 @@ import zermia.common.schedule.FaultArguments;
 import zermia.common.schedule.FaultDescription;
 import zermia.common.schedule.TriggerConditions;
 import zermia.common.schedule.arguments.DelayFaultArguments;
+import zermia.common.schedule.arguments.DifferentRequestsToAllArguments;
 import zermia.common.schedule.arguments.DropFaultArguments;
 import zermia.common.schedule.arguments.DuplicateFaultArguments;
 import zermia.coordinator.config.CoordinatorConfiguration;
@@ -71,13 +72,16 @@ public class ZermiaCoordinatorStub {
 
 				FaultArguments crt_faultArguments = null;
 				if(proto_faultDescription.getFaultType().equals("DelayFault")) {
-					crt_faultArguments = new DelayFaultArguments(proto_faultArguments.getFirstArg(), proto_faultArguments.getConsecutiveRounds());
+					crt_faultArguments = new DelayFaultArguments(proto_faultArguments.getConsecutiveRounds(), proto_faultArguments.getSecondArg());
 				} else if (proto_faultDescription.getFaultType().equals("DropFault")) {
-					crt_faultArguments = new DropFaultArguments(proto_faultArguments.getFirstArg(), proto_faultArguments.getConsecutiveRounds());
+					crt_faultArguments = new DropFaultArguments(proto_faultArguments.getConsecutiveRounds(), proto_faultArguments.getSecondArg());
 				} else if (proto_faultDescription.getFaultType().equals("DuplicateFault")) {
-					crt_faultArguments = new DuplicateFaultArguments(proto_faultArguments.getFirstArg(), proto_faultArguments.getConsecutiveRounds());
+					crt_faultArguments = new DuplicateFaultArguments(proto_faultArguments.getConsecutiveRounds(), proto_faultArguments.getSecondArg());
 				} else if (proto_faultDescription.getFaultType().equals("CrashFault")) {
 
+				} else if (proto_faultDescription.getFaultType().equals("DifferentRequestsToAll")) {
+					crt_faultArguments = new DifferentRequestsToAllArguments(proto_faultArguments.getConsecutiveRounds(), proto_faultArguments.getSecondArg(), proto_faultArguments.getThirdArg().toByteArray());
+					System.out.println(crt_faultArguments);
 				} else {
 					crt_faultArguments = new FaultArguments(proto_faultArguments.getConsecutiveRounds());
 				}

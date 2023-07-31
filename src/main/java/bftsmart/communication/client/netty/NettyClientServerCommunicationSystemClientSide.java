@@ -70,26 +70,26 @@ import io.netty.util.concurrent.GenericFutureListener;
 @Sharable
 public class NettyClientServerCommunicationSystemClientSide extends SimpleChannelInboundHandler<TOMMessage>
 		implements CommunicationSystemClientSide {
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	public final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final int clientId;
 	protected ReplyReceiver trr;
 	// ******* EDUARDO BEGIN **************//
-	private ClientViewController controller;
+	public ClientViewController controller;
 	// ******* EDUARDO END **************//
-	private final ConcurrentHashMap<Integer, NettyClientServerSession> sessionClientToReplica = new ConcurrentHashMap<>();
-	private ReentrantReadWriteLock rl;
+	public final ConcurrentHashMap<Integer, NettyClientServerSession> sessionClientToReplica = new ConcurrentHashMap<>();
+	public ReentrantReadWriteLock rl;
 	private Signature signatureEngine;
 	private boolean closed = false;
 
 	private final EventLoopGroup workerGroup;
-	private SyncListener listener;
+	public SyncListener listener;
 
 	private SecretKeyFactory secretKeyFactory;
 
 	/* Tulio Ribeiro */
 	private static final int tcpSendBufferSize = 8 * 1024 * 1024;
 	private static final int connectionTimeoutMsec = 40000; /* (40 seconds, timeout) */
-	private PrivateKey privKey;
+	public PrivateKey privKey;
 	/* end Tulio Ribeiro */
 
 	public NettyClientServerCommunicationSystemClientSide(int clientId, ClientViewController controller) {
@@ -306,11 +306,12 @@ public class NettyClientServerCommunicationSystemClientSide extends SimpleChanne
 				logger.error("Failed to clone TOMMessage", e);
 				continue;
 			}
-
+			//Modified JSoares (targets[target] it does not make sense since targetArray was already shuffled)
 //			sm.destination = targets[target];
 			sm.destination = target;
 
 			rl.readLock().lock();
+			//Modified JSoares (targets[target] it does not make sense since targetArray was already shuffled)
 //			Channel channel = sessionClientToReplica.get(targets[target]).getChannel();
 			Channel channel = sessionClientToReplica.get(target).getChannel();
 			rl.readLock().unlock();
@@ -322,6 +323,7 @@ public class NettyClientServerCommunicationSystemClientSide extends SimpleChanne
 
 				sent++;
 			} else {
+				//Modified JSoares (targets[target] it does not make sense since targetArray was already shuffled)
 //				logger.debug("Channel to " + targets[target] + " is not connected");
 				logger.debug("Channel to " + target + " is not connected");
 			}
@@ -442,7 +444,7 @@ public class NettyClientServerCommunicationSystemClientSide extends SimpleChanne
 		}, time, TimeUnit.SECONDS);
 	}
 
-	private class SyncListener implements GenericFutureListener<ChannelFuture> {
+	public class SyncListener implements GenericFutureListener<ChannelFuture> {
 
 		private int remainingFutures;
 

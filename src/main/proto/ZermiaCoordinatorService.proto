@@ -34,8 +34,9 @@ message Proto_RegistrationReply {
       string protocol_phase = 4; // state
     }
     message Proto_FaultArguments {
-      int32 firstArg = 1;
-      int32 consecutive_rounds = 2; // args
+      int32 consecutive_rounds = 1; // args
+      int32 secondArg = 2;
+      bytes thirdArg = 3;
     }
     string fault_type=1;
     Proto_TriggerConditions trigger_conditions = 2;
